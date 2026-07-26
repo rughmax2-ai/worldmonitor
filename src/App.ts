@@ -1647,6 +1647,9 @@ export class App {
     this.pendingDeepLinkCountry = initState.country ?? null;
     this.pendingDeepLinkExpanded = initState.expanded === true;
     this.pendingDeepLinkChokepoint = initState.chokepoint ?? null;
+    if (initState.profile === true && initState.country) {
+      this.countryIntel.setProfileMode(true);
+    }
     const earlyParams = new URLSearchParams(window.location.search);
     this.pendingDeepLinkStoryCode = earlyParams.get('c') ?? null;
     this.eventHandlers.setupUrlStateSync();

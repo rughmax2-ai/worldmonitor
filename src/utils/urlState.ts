@@ -52,6 +52,7 @@ export interface ParsedMapUrlState {
   layers?: MapLayers;
   country?: string;
   expanded?: boolean;
+  profile?: boolean;
   chokepoint?: string;
 }
 
@@ -95,6 +96,9 @@ export function parseMapUrlState(
 
   const expandedParam = params.get('expanded');
   const expanded = expandedParam === '1' ? true : undefined;
+
+  const profileParam = params.get('profile');
+  const profile = profileParam === '1' ? true : undefined;
 
   // Chokepoint deep-link (?chokepoint=bab_el_mandeb): opens the waterway popup on
   // the live map. Value is a canonical chokepoint/waterway id (lowercase, snake).
@@ -140,6 +144,7 @@ export function parseMapUrlState(
     layers,
     country,
     expanded,
+    profile,
     chokepoint,
   };
 }
@@ -154,6 +159,7 @@ export function buildMapUrl(
     layers: MapLayers;
     country?: string;
     expanded?: boolean;
+    profile?: boolean;
     chokepoint?: string;
   }
 ): string {
@@ -184,6 +190,10 @@ export function buildMapUrl(
 
   if (state.expanded) {
     params.set('expanded', '1');
+  }
+
+  if (state.profile) {
+    params.set('profile', '1');
   }
 
   if (state.chokepoint) {

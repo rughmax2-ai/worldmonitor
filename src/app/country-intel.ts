@@ -147,9 +147,19 @@ export class CountryIntelManager implements AppModule {
   private authUnsubscribe: (() => void) | null = null;
   private lastHadPremium = false;
   private countryBriefPageLoading: Promise<boolean> | null = null;
+  private useProfileView = false;
 
   constructor(ctx: AppContext) {
     this.ctx = ctx;
+  }
+
+  /**
+   * When enabled, `createCountryBriefPage` uses `CountryProfilePanel` (a
+   * simpler, full-screen country profile) instead of `CountryDeepDivePanel`.
+   * Call this before the first `openCountryBriefByCode` invocation.
+   */
+  public setProfileMode(enabled: boolean): void {
+    this.useProfileView = enabled;
   }
 
   async init(): Promise<void> {
@@ -238,7 +248,8 @@ export class CountryIntelManager implements AppModule {
 
   private async ensureCountryBriefPage(): Promise<boolean> {
     if (this.ctx.countryBriefPage) return true;
-    if (!this.ctx.map || this.ctx.isDestroyed) return false;
+    if (this.ctx.isDestroyed) return false;
+    if (!this.useProfileView && !this.ctx.map) return false;
     if (this.countryBriefPageLoading) return this.countryBriefPageLoading;
     const loading = this.createCountryBriefPage();
     this.countryBriefPageLoading = loading;
@@ -250,6 +261,30 @@ export class CountryIntelManager implements AppModule {
   }
 
   private async createCountryBriefPage(): Promise<boolean> {
+    if (this.useProfileView) {
+      const { CountryProfilePanel } = await import('@/components/CountryProfilePanel');
+      if (this.ctx.isDestroyed) return false;
+      this.ctx.countryBriefPage = new CountryProfilePanel({
+        onSwitchToFullView: (code, name) => {
+          this.useProfileView = false;
+          this.ctx.countryBriefPage?.hide();
+          this.ctx.countryBriefPage = null;
+          void this.openCountryBriefByCode(code, name).catch((err) => {
+            console.error('[CountryBrief] Failed to switch to full deep-dive:', err);
+            this.showToast('Country brief failed to open. Please try again.');
+          });
+        },
+      });
+      this.ctx.countryBriefPage.onClose(() => {
+        this.briefRequestToken++;
+        this.ctx.map?.clearCountryHighlight();
+        this.ctx.map?.setRenderPaused(false);
+        this.ctx.countryTimeline?.destroy();
+        this.ctx.countryTimeline = null;
+      });
+      return true;
+    }
+
     const { CountryDeepDivePanel } = await import('@/components/CountryDeepDivePanel');
     if (this.ctx.isDestroyed || !this.ctx.map) return false;
     this.ctx.countryBriefPage = new CountryDeepDivePanel(this.ctx.map);

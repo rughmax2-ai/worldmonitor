@@ -238,4 +238,6 @@ export interface CountryBriefPanel {
     commercial?: { indexValue: number; qoqChange: number | null; yoyChange: number | null; period: string } | null;
     dsr?: { dsrPct: number; change: number | null; period: string } | null;
   } | null): void;
+  /** True when this panel is a CountryProfilePanel (simplified view). */
+  readonly isProfileView?: boolean;
 }
