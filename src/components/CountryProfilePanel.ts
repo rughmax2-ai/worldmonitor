@@ -36,7 +36,7 @@ import type {
   CountryProductsResponse,
   MultiSectorShockResponse,
 } from '@/services/supply-chain';
-import { escapeHtml, sanitizeUrl } from '@/utils/sanitize';
+import { sanitizeUrl } from '@/utils/sanitize';
 import { toFlagEmoji } from '@/utils/country-flag';
 import { ciiBandForLevel } from './CountryDeepDivePanel-cii';
 import { setTrustedHtml, trustedHtml } from '@/utils/dom-utils';
@@ -305,13 +305,14 @@ export class CountryProfilePanel implements CountryBriefPanel {
     if (!this.factsBody) return;
     this.factsBody.replaceChildren();
     const facts: Array<[string, string]> = [];
-    if (data.capital) facts.push(['Capital', escapeHtml(data.capital)]);
+    // Values are set via textContent (safe, no HTML interpretation needed)
+    if (data.capital) facts.push(['Capital', data.capital]);
     if (data.population > 0) facts.push(['Population', formatNumber(data.population)]);
     if (data.headOfState && data.headOfStateTitle) {
-      facts.push([escapeHtml(data.headOfStateTitle), escapeHtml(data.headOfState)]);
+      facts.push([data.headOfStateTitle, data.headOfState]);
     }
-    if (data.languages.length > 0) facts.push(['Language', escapeHtml(data.languages.slice(0, 2).join(', '))]);
-    if (data.currencies.length > 0) facts.push(['Currency', escapeHtml(data.currencies.slice(0, 2).join(', '))]);
+    if (data.languages.length > 0) facts.push(['Language', data.languages.slice(0, 2).join(', ')]);
+    if (data.currencies.length > 0) facts.push(['Currency', data.currencies.slice(0, 2).join(', ')]);
     const grid = this.el('div', 'cpp-facts-grid');
     for (const [k, v] of facts) {
       const item = this.el('div', 'cpp-fact-item');

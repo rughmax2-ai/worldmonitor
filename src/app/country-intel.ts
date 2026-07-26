@@ -277,6 +277,7 @@ export class CountryIntelManager implements AppModule {
       });
       this.ctx.countryBriefPage.onClose(() => {
         this.briefRequestToken++;
+        // map is optional for profile view — optional chaining is intentional here.
         this.ctx.map?.clearCountryHighlight();
         this.ctx.map?.setRenderPaused(false);
         this.ctx.countryTimeline?.destroy();
