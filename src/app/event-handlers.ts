@@ -1298,6 +1298,7 @@ export class EventHandlerManager implements AppModule {
     const baseUrl = `${window.location.origin}${window.location.pathname}`;
     const briefPage = this.ctx.countryBriefPage;
     const isCountryVisible = briefPage?.isVisible() ?? false;
+    const isProfileView = isCountryVisible && (briefPage?.isProfileView ?? false);
     return buildMapUrl(baseUrl, {
       view: state.view,
       zoom: state.zoom,
@@ -1305,7 +1306,8 @@ export class EventHandlerManager implements AppModule {
       timeRange: state.timeRange,
       layers: state.layers,
       country: isCountryVisible ? (briefPage?.getCode() ?? undefined) : undefined,
-      expanded: isCountryVisible && briefPage?.getIsMaximized?.() ? true : undefined,
+      expanded: isCountryVisible && !isProfileView && briefPage?.getIsMaximized?.() ? true : undefined,
+      profile: isProfileView ? true : undefined,
       chokepoint: !isCountryVisible ? (this.ctx.activeChokepoint ?? undefined) : undefined,
     });
   }
